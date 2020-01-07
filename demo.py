@@ -47,10 +47,10 @@ class Detect(object):
         self.transform = get_augumentation(phase='test')
         if(self.weights is not None):
             print('Load pretrained Model')
-            checkpoint = torch.load(
-                self.weights, map_location=lambda storage, loc: storage)
-            num_class = checkpoint['num_class']
-            network = checkpoint['network']
+            checkpoint = torch.load(self.weights, map_location=lambda storage, loc: storage)
+            params = checkpoint['parser']
+            num_class = params.num_class
+            network = params.network
 
         self.model = EfficientDet(num_classes=num_class,
                      network=network,
@@ -63,7 +63,8 @@ class Detect(object):
         if(self.weights is not None):
             state_dict = checkpoint['state_dict']
             self.model.load_state_dict(state_dict)
-        self.model = self.model.cuda()
+        if torch.cuda.is_available():
+            self.model = self.model.cuda()
         self.model.eval()
 
     def process(self, file_name=None, img=None, show=False):
